@@ -5,8 +5,8 @@
  * @param {number} options.width - The initial width of the editor.
  * @param {number} options.height - The initial height of the editor.
  */
- class SamerEditor {
-  constructor(editor, options = { modules: {syntax: true,toolbar:{container:null,options:[]}},  theme: 'light' }
+class SamerEditor {
+  constructor(query, options = { modules: {syntax: true,toolbar:{container:null,options:[]}},  theme: 'light' }
   ) {
     this._samerEditorButtons = {
       toggleType: {
@@ -14,25 +14,25 @@
           html: '<b>B</b>',
           value: '<br>',
           nodeName: 'B',
-          events: [],
+          className: `samerEditor-bold toggleType`
         },
         italic: {
           html: '<em>I</em>',
           value: '<br/>',
           nodeName: 'EM',
-          events: [],
+          className: `samerEditor-italic toggleType`
         },
         underline: {
           html: '<u>U</u>',
           value: '<br/>',
           nodeName: 'U',
-          events: [],
+          className: `samerEditor-underline toggleType`
         },
         strike: {
           html: '<s>S</s>',
           value: '<br/>',
           nodeName: 'S',
-          events: [],
+          className: `samerEditor-stike toggleType`
         },
 
         //TODO
@@ -42,29 +42,52 @@
         //     bullet:``
         //   },
         //   value: ['<ol></ol>', '<ul></ul>'],
-        //   events: [],
+        //   
         // },
         // future update
         // code: {
         //   html: '',
         //   value: '',
-        //   events: [],
+        //   
         // },
       },
+     defaultType:{
+       undo:{
+        html:`
+        <svg viewBox="0 0 48 48" fill="none">
+        <rect  fill="white" fill-opacity="0.01"/>
+        <path style="stroke-width: 5;" class="samerEditor-stroke" d="M11.2721 36.7279C14.5294 39.9853 19.0294 42 24 42C33.9411 42 42 33.9411 42 24C42 14.0589 33.9411 6 24 6C19.0294 6 14.5294 8.01472 11.2721 11.2721C9.61407 12.9301 6 17 6 17" />
+        <path style="stroke-width: 4;" class="samerEditor-stroke" d="M6 9V17H14"  stroke-width="4" />
+        </svg>
+        `,
+        className:'samerEditor-undo samerEditor-svgParent defaultType'  
+       },
+       redo:{
+        html:`
+        <svg   viewBox="0 0 48 48" fill="none">
+        <rect  fill="white" fill-opacity="0.01"/>
+        <path class="samerEditor-stroke" style="stroke-width: 5;" d="M36.7279 36.7279C33.4706 39.9853 28.9706 42 24 42C14.0589 42 6 33.9411 6 24C6 14.0589 14.0589 6 24 6C28.9706 6 33.4706 8.01472 36.7279 11.2721C38.3859 12.9301 42 17 42 17" />
+        <path class="samerEditor-stroke" style="stroke-width: 5;" d="M42 8V17H33" />
+        </svg>
+        `,
+        className:'samerEditor-redo samerEditor-svgParent defaultType'  
+       }
+     }
+
     };
 
-   
-
-    this.toolbar = document.querySelector(options.modules.toolbar.container)
-    this.toolbar.className = `samerEditor-toolbar theme-${options.theme}`;
-    this._buildToolbar(options.modules.toolbar.options || []);
-
-    this.editor = document.querySelector(editor);
+    this.editor = document.querySelector(query);
     this.editor.className = 'samerEditor-editor';
    if (this.editor.children.length === 0) 
     this.editor.innerHTML = `<p style="margin:0;padding:0"><span style="font-size: 1.5em;"><br></span></p>`;
     this.editor.setAttribute('contenteditable', 'true');
      this.editor.setAttribute('spellcheck', options.modules.syntax);
+
+    this.toolbar = document.querySelector(options.modules.toolbar.container)
+    this.toolbar.className = `samerEditor-toolbar theme-${options.theme}`;
+    this._buildToolbar(options.modules.toolbar.options || []);
+
+  
    
 
     this._selection = window.getSelection();
@@ -75,7 +98,7 @@
     this._focusedOffset = 0;
     this._lineNodenames = ['P', 'OL', 'UL', 'H1', 'H2'];
 
-
+  
     this._initEditor.bind(this)();
   }
 
@@ -88,23 +111,36 @@
 
     this.editor.onkeydown = this._editorKeyDownHandler.bind(this);
     this.editor.oninput = this._editorInputHandler.bind(this);
+
+      //fn for updating the mementos
+     this._updateMementos = this._debounce(()=>{
+     if (!this._mementos.includes(this.editor.innerHTML)){  
+      this._mementos.push(this.editor.innerHTML)
+      this._mementoIndex += 1
+      this._redoUndoDisableHandler() 
+     } 
+     },300)
+        
+    
   }
 
   _buildToolbar(arr) {
-
     for (const formats of arr) {
       const currentformats = document.createElement('span');
       currentformats.className = 'samerEditor-formats';
       for (const item of formats) {
+        let button = null
         if (item in this._samerEditorButtons.toggleType) {
-          const button = this._getToggleBtn(item);
-          currentformats.appendChild(button);
+           button = this._getToggleBtn(item);
+        } else if (item in this._samerEditorButtons.defaultType) {
+          button = this._getDefaultBtn(item);
         }
         // else if (item in samerEditorButtons.pickerType) {
         // } else if (item in samerEditorButtons.selectType) {
         // } else if (item in samerEditorButtons.fileType) {
-        // } else if (item in samerEditorButtons.defaultType) {
-        // }
+        //}
+       if(button !== null) 
+        currentformats.appendChild(button);
       }
 
       this.toolbar.appendChild(currentformats);
@@ -129,7 +165,7 @@
       leftNode = document.createElement(this._focusedNode.nodeName);
       leftNode.innerHTML = this._focusedNode.innerHTML;
       leftNode.style.cssText = this._focusedNode.style.cssText;
-      this.getDeepestChild(leftNode).textContent = leftText;
+      this._getDeepestChild(leftNode).textContent = leftText;
     }
     let rightNode = null;
     if (rightText.length > 0) {
@@ -137,7 +173,7 @@
       rightNode.innerHTML = this._focusedNode.innerHTML;
 
       rightNode.style.cssText = this._focusedNode.style.cssText;
-      this.getDeepestChild(rightNode).textContent = rightText;
+      this._getDeepestChild(rightNode).textContent = rightText;
     }
 
     if (rightNode !== null) {
@@ -151,7 +187,7 @@
       this._focusedLineNode.insertBefore(leftNode, this._newCreatedNode);
     }
 
-    const deepestChild = this.getDeepestChild(this._newCreatedNode);
+    const deepestChild = this._getDeepestChild(this._newCreatedNode);
     deepestChild.innerHTML =
       this._focusedNode.textContent[this._selection.focusOffset - 1] || '<br>';
 
@@ -169,64 +205,15 @@
   }
 
   //handlers for editor
-  _editorKeyUpHandler(e) {
+  _editorKeyUpHandler() {
     this._updateFocus();
     this._toolbarButtonsHighligthHandler();
-    console.log(this.editor.innerHTML)
   }
   _editorKeyDownHandler(e) {
     //checking if key == enter then create new line
     if (e.key === 'Enter') {
       e.preventDefault();
-      const p = document.createElement('p');
-      p.style.cssText = 'margin:0;padding:0;'
-      // store the content of focused node "txt"
-      const txt = this._focusedNode.textContent.substring(this._focusedOffset);
-      // creating a new node by coping the focused node
-      const newNode = document.createElement(this._focusedNode.nodeName);
-      newNode.style.cssText = this._focusedNode.style.cssText;
-      newNode.innerHTML = this._focusedNode.innerHTML;
-      this.getDeepestChild(newNode).textContent =
-        this._focusedNode.textContent.substring(0, this._focusedOffset);
-      //inserting the new node before to the "focusedNode"
-
-      if (this._focusedLineNode.contains(this._focusedNode))
-        this._focusedLineNode.insertBefore(newNode, this._focusedNode);
-      else {
-        console.log(this._focusedNode);
-        return 0;
-      }
-
-      // Removing all the childNodes of "focusedLineNode" which was right side of focusedNode
-      let startIndex = this.getChildNodeIndex(
-        this._focusedNode,
-        this._focusedLineNode
-      );
-      while (startIndex !== this._focusedLineNode.children.length) {
-        p.innerHTML += this._focusedLineNode.children[startIndex].outerHTML;
-        this._focusedLineNode.removeChild(
-          this._focusedLineNode.children[startIndex]
-        );
-      }
-      // Base oparation
-      this.getDeepestChild(this._focusedLineNode.lastElementChild).innerHTML +=
-        '<br>';
-      this.getDeepestChild(p.firstElementChild).textContent = txt;
-      this.getDeepestChild(p.firstElementChild).innerHTML += '<br>';
-
-      //inserting the line and updating old focused nodes and lines
-      this._insertAfter(p, this._focusedLineNode, this.editor);
-
-      this._focusedLineNode = p;
-      this._focusedNode = p.firstElementChild;
-      this._focusedTextNode = p.firstElementChild.childNodes[0];
-      this._focusedOffset = 0;
-
-      const range = this._selection.getRangeAt(0);
-      range.setStartBefore(p.firstElementChild);
-      range.setEndBefore(p.firstElementChild);
-      this._selection.removeAllRanges();
-      this._selection.addRange(range);
+      this._createNewLine()
     }
   }
 
@@ -234,8 +221,62 @@
     if (this._newCreatedNode !== null) {
       this._insertNewCreatedNode();
     }
-  }
+    
+    if (this._mementos !== undefined){
+     this._updateMementos()
+    }
 
+  }
+  _createNewLine(){
+    const p = document.createElement('p');
+    p.style.cssText = 'margin:0;padding:0;'
+    // store the content of focused node "txt"
+    const txt = this._focusedNode.textContent.substring(this._focusedOffset);
+    // creating a new node by coping the focused node
+    const newNode = document.createElement(this._focusedNode.nodeName);
+    newNode.style.cssText = this._focusedNode.style.cssText;
+    newNode.innerHTML = this._focusedNode.innerHTML;
+    this._getDeepestChild(newNode).textContent =
+      this._focusedNode.textContent.substring(0, this._focusedOffset);
+    //inserting the new node before to the "focusedNode"
+
+    if (this._focusedLineNode.contains(this._focusedNode))
+      this._focusedLineNode.insertBefore(newNode, this._focusedNode);
+    else {
+      console.log(this._focusedNode);
+      return 0;
+    }
+
+    // Removing all the childNodes of "focusedLineNode" which was right side of focusedNode
+   
+   let startIndex = Array.from(this._focusedLineNode.children).indexOf(this._focusedNode)
+  
+    while (startIndex !== this._focusedLineNode.children.length) {
+      p.innerHTML += this._focusedLineNode.children[startIndex].outerHTML;
+      this._focusedLineNode.removeChild(
+        this._focusedLineNode.children[startIndex]
+      );
+    }
+    // Base oparation
+    this._getDeepestChild(this._focusedLineNode.lastElementChild).innerHTML +=
+      '<br>';
+    this._getDeepestChild(p.firstElementChild).textContent = txt;
+    this._getDeepestChild(p.firstElementChild).innerHTML += '<br>';
+
+    //inserting the line and updating old focused nodes and lines
+    this._insertAfter(p, this._focusedLineNode, this.editor);
+
+    this._focusedLineNode = p;
+    this._focusedNode = p.firstElementChild;
+    this._focusedTextNode = p.firstElementChild.childNodes[0];
+    this._focusedOffset = 0;
+
+    const range = this._selection.getRangeAt(0);
+    range.setStartBefore(p.firstElementChild);
+    range.setEndBefore(p.firstElementChild);
+    this._selection.removeAllRanges();
+    this._selection.addRange(range);
+  }
   _updateFocus() {
     if (this.editor.contains(this._selection.focusNode)) {
       //updating old focused offset
@@ -385,12 +426,14 @@
      this._deactivateToolbarButtons()
     }
   }
-
-  //helper function
-  _getToggleBtn = (name) => {
+  _defaultBtnClickHandler(button) {
+   alert(button.classList[0])
+  }
+  //helper functions:
+  _getToggleBtn(name){
     const button = document.createElement('button');
-    const { html, value, nodeName } = this._samerEditorButtons.toggleType[name];
-    button.className = `samerEditor-${name} toggleType`;
+    const { html, value, nodeName,className } = this._samerEditorButtons.toggleType[name];
+    button.className = className;
     this[`${name}Button`] = button;
     button.innerHTML = html;
     button.value = value;
@@ -400,46 +443,104 @@
     );
     return button;
   };
-
+ 
+  _getDefaultBtn(name){
+    const button = document.createElement('button');
+    const {html,className} = this._samerEditorButtons.defaultType[name];
+    button.className = className
+    this[`${name}Button`] = button;
+    button.innerHTML = html;
+  
+    if(name === 'undo' || name === 'redo'){
+       this._mementos = [this.editor.innerHTML]
+       this._mementoIndex = 0;
+       this._redoUndoDisableHandler()
+       button.addEventListener('click', () =>
+       this._redoUndoClickHandler.bind(this)(name)
+       
+     );
+    } 
+    return button;
+  }
+  
+  _redoUndoClickHandler(name){
+   const undo = ()=>{
+    if (this._mementoIndex > 0) {
+      this.editor.innerHTML = this._mementos[--this._mementoIndex]
+    }
+   }
+   const redo = ()=>{
+   if (this._mementoIndex < this._mementos.length - 1) {
+      this.editor.innerHTML = this._mementos[++this._mementoIndex]
+    }
+   }
+    switch(name){
+    case 'undo' : undo() ; break;
+    case 'redo' : redo() ; break;
+   }
+   this._redoUndoDisableHandler()
+  }
+ _redoUndoDisableHandler(){
+  if (this._mementoIndex <= 0){
+    this.undoButton?.setAttribute("disabled", "true")
+   }else{
+     this.undoButton?.removeAttribute("disabled", "false")
+ 
+   }
+   if (this._mementoIndex >= this._mementos.length - 1){
+    this.redoButton?.setAttribute("disabled", "true")
+   }else{
+     this.redoButton?.removeAttribute("disabled", "true")
+   }
+ }
+  //function for highliting active buttons
   _toolbarButtonsHighligthHandler() {
     //bold
+   if (this.boldButton !== undefined){ 
     if (
       this._focusedNode.nodeName === 'B' ||
       this._focusedNode.querySelector('b') !== null
     ) {
-      this.boldButton?.classList.add('active');
+      this.boldButton.classList.add('active');
     } else {
-      this.boldButton?.classList.remove('active');
+      this.boldButton.classList.remove('active');
     }
+  }
     //italic
+    if (this.italicButton !== undefined){ 
     if (
       this._focusedNode.nodeName === 'EM' ||
       this._focusedNode.querySelector('em') !== null
     ) {
-      this.italicButton?.classList.add('active');
+      this.italicButton.classList.add('active');
     } else {
-      this.italicButton?.classList.remove('active');
+      this.italicButton.classList.remove('active');
     }
+  }
     //underline
-    if (
+    if (this.underlineButton !== undefined){ 
+      if (
       this._focusedNode.nodeName === 'U' ||
       this._focusedNode.querySelector('u') !== null
     ) {
-      this.underlineButton?.classList.add('active');
+      this.underlineButton.classList.add('active');
     } else {
-      this.underlineButton?.classList.remove('active');
+      this.underlineButton.classList.remove('active');
     }
+  } 
     //strike
-    if (
+    if (this.strikeButton !== undefined){ 
+      if (
       this._focusedNode.nodeName === 'S' ||
       this._focusedNode.querySelector('s') !== null
     ) {
-      this.strikeButton?.classList.add('active');
+      this.strikeButton.classList.add('active');
     } else {
-      this.strikeButton?.classList.remove('active');
+      this.strikeButton.classList.remove('active');
     }
   }
-
+  }
+ 
   // helper functions :
   _insertAfter(newNode, child, parent) {
     if (child.nextElementSibling === null) {
@@ -460,7 +561,7 @@
      }
   }
   //helper fn: debounce
-  debounce(fn, delay) {
+  _debounce(fn, delay) {
     let timeout = undefined;
     return function () {
       if (timeout) clearTimeout(timeout);
@@ -469,7 +570,7 @@
   }
 
   // helper function for finding the last element child of any elm
-  getDeepestChild = (elm) => {
+  _getDeepestChild = (elm) => {
     let currentElm = elm;
     while (
       currentElm.firstElementChild !== null &&

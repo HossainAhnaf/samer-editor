@@ -1,3 +1,14 @@
+.samerEditor-stroke{
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+    stroke: #444;
+}
+
+.samerEditor-thin{
+    stroke-width: 1;
+ }
+
 .samerEditor-toolbar{
     border: min(1vw,2px) solid black;
     padding: .5vw;
@@ -41,6 +52,22 @@ color: orangered;
     opacity: .5;
     cursor:initial ;
 }
+
+.samerEditor-svgParent {
+    width: 1.2em;
+    height: 1.2em;
+    cursor: pointer;
+   }  
+   .samerEditor-svgParent > svg{
+      width: 100%;
+      height: 100%;
+     }  
+   .samerEditor-svgParent:hover   .samerEditor-fill{
+      fill: orangered;
+   }
+   .samerEditor-svgParent:not(:disabled):hover   .samerEditor-stroke{
+      stroke: orangered;
+   }
 
 .samerEditor-editor{
     outline: none;
