@@ -4,8 +4,8 @@ SamerEditor is a rich text editor class designed to provide a flexible and custo
 
 ## Table of Contents
 - [Getting Started](#getting-started)
-- [Features](#features)
-- [Usage](#usage)
+- [Installation](#Installation)
+- [features](#features)
 - [Configuration](#configuration)
 - [Contributing](#contributing)
 - [License](#license)
@@ -17,13 +17,18 @@ Follow the steps below to integrate SamerEditor into your project:
 First of all you have to download the project then You can include the SamerEditor class in your project using a script tag:
 ```html
 <script src="./samer-editor/core/samer-editor.js"></script>
-
+```
 ### Features
-1. Customizable toolbar with formatting options.
-2. Will get SEO-friendly HTML.
-3. Theme support.
+- [Customizable toolbar with formatting options](#toolbar).
+- [SEO-friendly](#seo-friendly).
+- [Theme support](#theme-support).
 ### Toolbar
+The editor comes with a customizable toolbar that allows you to apply formatting options to the selected text. You can toggle options such as bold, italic, underline, and strike-through
+I will add more formatting options in future.
+
 ### SEO-friendly
+SamerEditor gives you a SEO-friendly HTML.
+
 ### Theme Support
 SamerEditor supports multiple themes. You can switch between light and dark themes to match your application's style.
 
@@ -39,7 +44,7 @@ SamerEditor supports multiple themes. You can switch between light and dark them
     },
       theme:'light'//or 'dark'
     }, 400, 600);
-
+```
 ### Contributing
 If you would like to contribute to SamerEditor, feel free to open issues or submit pull requests on the GitHub repository.
 
