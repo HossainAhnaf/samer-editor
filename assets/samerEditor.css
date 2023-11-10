@@ -1,0 +1,58 @@
+.samerEditor-toolbar{
+    border: min(1vw,2px) solid black;
+    padding: .5vw;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1vw;
+    overflow: hidden;
+}
+.samerEditor-toolbar.theme-dark{
+    background-color: rgba(0, 0, 0, 0.7);
+}
+.samerEditor-toolbar.theme-light{
+    background: linear-gradient( orangered,darkred);
+    background-color: orangered;
+}
+.samerEditor-formats{
+ background-color: white;
+ display: flex;
+ gap: 15px;
+ width: max-content;
+ height: max-content;
+ padding: min(10px,3%) min(18px,6%);
+box-shadow: 0 0 2.5px 1.5px rgba(0, 0, 0, 0.5);
+
+}
+
+.samerEditor-formats :is(button,label){
+font-weight: 700;
+border: none;
+background-color: transparent;
+font-size: 1.2em;
+cursor: pointer;
+padding: 0;
+transition: scale .2s;
+}   
+.samerEditor-formats :is(button:not(:disabled):hover,button.active){
+color: orangered;
+}   
+.samerEditor-formats > button:disabled{
+    opacity: .5;
+    cursor:initial ;
+}
+
+.samerEditor-editor{
+    outline: none;
+    padding: 1em;
+    overflow-y: scroll;
+    overflow-x:hidden;
+    border: min(1vw,2px) solid black;
+}
+.samerEditor-editor *{
+    box-sizing: border-box;
+}
+.samerEditor-editor :is(img,video){
+    width: 30em;
+    height: 30em;
+}
