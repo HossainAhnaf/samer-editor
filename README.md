@@ -33,7 +33,7 @@ SamerEditor gives you a SEO-friendly HTML.
 SamerEditor supports multiple themes. You can switch between light and dark themes to match your application's style.
 
 ### Configuration
-```html
+```js
   const samerEditor = new SamerEditor('#editor',{
       modules:{
         syntax: false,
@@ -52,6 +52,4 @@ If you would like to contribute to SamerEditor, feel free to open issues or subm
 This project is licensed under the MIT License - see the LICENSE.md file for details.
 ```vbnet
 
-This README provides an overview of your SamerEditor tool, its features, usage, and configuration. Please make sure to replace placeholders such as `"# editor-container"`, and `"your-repository-url"` with actual values specific to your project.
-
-Feel free to add more details, usage examples, and custom features that are unique to your rich text editor.
+This README provides an overview of your SamerEditor tool, its features, usage, and configuration.
