@@ -16,6 +16,7 @@ Follow the steps below to integrate SamerEditor into your project:
 ### Installation
 First of all you have to download the project then You can include the SamerEditor class in your project using a script tag:
 ```html
+<link rel='stylesheet' href='./samer-editor/assets/css/samer-editor.css'/>
 <script src="./samer-editor/core/samer-editor.js"></script>
 ```
 ### Features
