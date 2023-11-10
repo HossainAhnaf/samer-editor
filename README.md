@@ -24,7 +24,13 @@ First of all you have to download the project then You can include the SamerEdit
 - [SEO-friendly](#seo-friendly).
 - [Theme support](#theme-support).
 ### Toolbar
-The editor comes with a customizable toolbar that allows you to apply formatting options to the selected text. You can toggle options such as bold, italic, underline, and strike-through
+The editor comes with a customizable toolbar that allows you to apply formatting options to the selected text. You can toggle options: 
+- bold
+- italic
+- underline
+- strike-through
+- undo
+- redo
 I will add more formatting options in future.
 
 ### SEO-friendly
