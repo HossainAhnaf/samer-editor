@@ -17,6 +17,7 @@ Follow the steps below to integrate SamerEditor into your project:
 First of all you have to download the project then You can include the SamerEditor class in your project using a script tag:
 ```html
 <script src="./samer-editor/core/samer-editor.js"></script>
+
 ### Features
 1. Customizable toolbar with formatting options.
 2. Will get SEO-friendly HTML.
