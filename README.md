@@ -31,7 +31,8 @@ The editor comes with a customizable toolbar that allows you to apply formatting
 - strike-through
 - undo
 - redo
-I will add more formatting options in future.
+- headers : h1,h2,h3,h4,h5,h6
+`I will add more formatting options in future.`
 
 ### SEO-friendly
 SamerEditor gives you a SEO-friendly HTML.
