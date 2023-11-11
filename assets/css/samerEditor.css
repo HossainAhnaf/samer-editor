@@ -33,7 +33,7 @@
  height: max-content;
  padding: min(10px,3%) min(18px,6%);
 box-shadow: 0 0 2.5px 1.5px rgba(0, 0, 0, 0.5);
-
+font-size: min(4vw,15px);
 }
 
 .samerEditor-formats :is(button,label){
@@ -52,8 +52,11 @@ color: orangered;
     opacity: .5;
     cursor:initial ;
 }
-
-.samerEditor-svgParent {
+.samerEditor-formats > button.samerEditor-header::after{
+    content: attr(value);
+    font-size: .8em;
+}
+.samerEditor-formats .samerEditor-svgParent {
     width: 1.2em;
     height: 1.2em;
     cursor: pointer;
