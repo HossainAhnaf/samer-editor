@@ -1,3 +1,5 @@
+import _samerEditorButtons from "../samerEditor-buttons";
+
 /**
  * SamerEditor - A rich text editor class.
  * @param {string} query - The query selector of the editor container.
@@ -8,74 +10,6 @@
 class SamerEditor {
   constructor(query, options = { modules: {syntax: true,toolbar:{container:null,options:[]}},  theme: 'light' }
   ) {
-    this._samerEditorButtons = {
-      toggleType: {
-        bold: {
-          html: '<b>B</b>',
-          value: '<br>',
-          nodeName: 'B',
-          className: `samerEditor-bold toggleType`
-        },
-        italic: {
-          html: '<em>I</em>',
-          value: '<br/>',
-          nodeName: 'EM',
-          className: `samerEditor-italic toggleType`
-        },
-        underline: {
-          html: '<u>U</u>',
-          value: '<br/>',
-          nodeName: 'U',
-          className: `samerEditor-underline toggleType`
-        },
-        strike: {
-          html: '<s>S</s>',
-          value: '<br/>',
-          nodeName: 'S',
-          className: `samerEditor-stike toggleType`
-        },
-
-        //TODO
-        // list: {
-        //   html: {
-        //     ordered: ``,
-        //     bullet:``
-        //   },
-        //   value: ['<ol></ol>', '<ul></ul>'],
-        //   
-        // },
-        // future update
-        // code: {
-        //   html: '',
-        //   value: '',
-        //   
-        // },
-      },
-     defaultType:{
-       undo:{
-        html:`
-        <svg viewBox="0 0 48 48" fill="none">
-        <rect  fill="white" fill-opacity="0.01"/>
-        <path style="stroke-width: 5;" class="samerEditor-stroke" d="M11.2721 36.7279C14.5294 39.9853 19.0294 42 24 42C33.9411 42 42 33.9411 42 24C42 14.0589 33.9411 6 24 6C19.0294 6 14.5294 8.01472 11.2721 11.2721C9.61407 12.9301 6 17 6 17" />
-        <path style="stroke-width: 4;" class="samerEditor-stroke" d="M6 9V17H14"  stroke-width="4" />
-        </svg>
-        `,
-        className:'samerEditor-undo samerEditor-svgParent defaultType'  
-       },
-       redo:{
-        html:`
-        <svg   viewBox="0 0 48 48" fill="none">
-        <rect  fill="white" fill-opacity="0.01"/>
-        <path class="samerEditor-stroke" style="stroke-width: 5;" d="M36.7279 36.7279C33.4706 39.9853 28.9706 42 24 42C14.0589 42 6 33.9411 6 24C6 14.0589 14.0589 6 24 6C28.9706 6 33.4706 8.01472 36.7279 11.2721C38.3859 12.9301 42 17 42 17" />
-        <path class="samerEditor-stroke" style="stroke-width: 5;" d="M42 8V17H33" />
-        </svg>
-        `,
-        className:'samerEditor-redo samerEditor-svgParent defaultType'  
-       }
-     }
-
-    };
-
     this.editor = document.querySelector(query);
     this.editor.className = 'samerEditor-editor';
    if (this.editor.children.length === 0) 
@@ -96,7 +30,7 @@ class SamerEditor {
     this._focusedNode = this._focusedLineNode.lastElementChild;
     this._focusedTextNode = this._focusedNode.childNodes[0];
     this._focusedOffset = 0;
-    this._lineNodenames = ['P', 'OL', 'UL', 'H1', 'H2'];
+    this._lineNodenames = ['P', 'OL', 'UL', 'H1', 'H2','H3','H4','H5','H6'];
 
   
     this._initEditor.bind(this)();
@@ -105,7 +39,7 @@ class SamerEditor {
   _initEditor() {
     this.editor.onkeyup = this._editorKeyUpHandler.bind(this);
     this.editor.onclick = () => {
-      this._updateFocus.bind(this)();
+      this._updateFocusedNodes.bind(this)();
       this._toolbarButtonsHighligthHandler();
     };
 
@@ -124,29 +58,7 @@ class SamerEditor {
     
   }
 
-  _buildToolbar(arr) {
-    for (const formats of arr) {
-      const currentformats = document.createElement('span');
-      currentformats.className = 'samerEditor-formats';
-      for (const item of formats) {
-        let button = null
-        if (item in this._samerEditorButtons.toggleType) {
-           button = this._getToggleBtn(item);
-        } else if (item in this._samerEditorButtons.defaultType) {
-          button = this._getDefaultBtn(item);
-        }
-        // else if (item in samerEditorButtons.pickerType) {
-        // } else if (item in samerEditorButtons.selectType) {
-        // } else if (item in samerEditorButtons.fileType) {
-        //}
-       if(button !== null) 
-        currentformats.appendChild(button);
-      }
 
-      this.toolbar.appendChild(currentformats);
-    }
-    return toolbar;
-  }
 
   _insertNewCreatedNode() {
     // splitted left right text
@@ -206,7 +118,7 @@ class SamerEditor {
 
   //handlers for editor
   _editorKeyUpHandler() {
-    this._updateFocus();
+    this._updateFocusedNodes();
     this._toolbarButtonsHighligthHandler();
   }
   _editorKeyDownHandler(e) {
@@ -228,7 +140,7 @@ class SamerEditor {
 
   }
   _createNewLine(){
-    const p = document.createElement('p');
+    const p = document.createElement(this._focusedLineNode.nodeName);
     p.style.cssText = 'margin:0;padding:0;'
     // store the content of focused node "txt"
     const txt = this._focusedNode.textContent.substring(this._focusedOffset);
@@ -277,7 +189,8 @@ class SamerEditor {
     this._selection.removeAllRanges();
     this._selection.addRange(range);
   }
-  _updateFocus() {
+ // this function will update the focused node,line,textNode 
+  _updateFocusedNodes() {
     if (this.editor.contains(this._selection.focusNode)) {
       //updating old focused offset
       this._focusedOffset = this._selection.focusOffset;
@@ -300,9 +213,7 @@ class SamerEditor {
         }
         this._focusedNode = current;     
        }
-      if (this._focusedNode.nodeName === 'LI') {
-        this._focusedNode = this._selection.focusNode.parentElement;
-      }
+      
       //updating the last time focused Text Node
       if (this._selection.focusNode.nodeName === '#text') {
         this._focusedTextNode = this._selection.focusNode;
@@ -310,18 +221,104 @@ class SamerEditor {
     }
   }
 
-  // handlers for toolbar buttons
-  _toggleBtnClickHandler(button) {
+ //this function will build the entire toolbar and the formatting buttons
+  _buildToolbar(arr) {
+    for (const formats of arr) {
+      const currentformats = document.createElement('span');
+      currentformats.className = 'samerEditor-formats';
+      for (const item of formats) {
+        const name = typeof item === 'object' ? Object.keys(item)[0] : item
+        let button = null
+        if (name in this._samerEditorButtons.toggleType) {
+           button = this._getToggleBtn(item);
+        } else if (name in this._samerEditorButtons.defaultType) {
+          button = this._getDefaultBtn(item);
+        } else if (name in this._samerEditorButtons.lineType){
+          button = this._getLineBtn(item);
+        }
+        // else if (name in samerEditorButtons.pickerType) {
+        // } else if (name in samerEditorButtons.selectType) {
+        // } else if (name in samerEditorButtons.fileType) {
+        //}
+       if(button !== null) 
+        currentformats.appendChild(button);
+      }
+
+      this.toolbar.appendChild(currentformats);
+    }
+    return toolbar;
+  }
+
+  // this function will create toggle type button 
+  _getToggleBtn(name){
+    const { html, value, nodeName,className } = this._samerEditorButtons.toggleType[name];
+    const button = document.createElement('button');
+    button.className = className;    
+    this[`${name}Button`] = button;
+    button.innerHTML = html;
+    button.value = value;
+    button.setAttribute('data-nodeName', nodeName);  
+ 
+    button.addEventListener('click', () =>
+      this._toggleBtnClickHandler.bind(this)(button)
+    );
+    return button;
+  };
+ 
+  // this function will create default type button -- sorry I haven't better names for button groups
+  // You can contribute - if you have better name for varries and fns    
+  _getDefaultBtn(name){
+    const button = document.createElement('button');
+    const {html,className} = this._samerEditorButtons.defaultType[name];
+    button.className = className
+    this[`${name}Button`] = button;
+    button.innerHTML = html;
+  
+    if(name === 'undo' || name === 'redo'){
+       this._mementos = [this.editor.innerHTML]
+       this._mementoIndex = 0;
+       this._redoUndoDisableHandler()
+       button.addEventListener('click', () =>
+       this._redoUndoClickHandler.bind(this)(name)
+       
+     );
+    } 
+    return button;
+  }
+  // this function will create line type button -- sorry I haven't better names for button groups
+  // You can contribute - if you have better name for varries and fns     
+  _getLineBtn(obj){
+    const button = document.createElement('button');
+    const name = Object.keys(obj)[0]
+    const { html,nodeName,className } = this._samerEditorButtons.lineType[name];
+    const finalNodeName = nodeName + obj[name]  
+      button.className = className;    
+      button.innerHTML = html
+      button.value = obj[name]
+      button.setAttribute('data-nodeName', finalNodeName);  
+      this[`${finalNodeName}Button`] = button;
+   
+      button.addEventListener('click', () =>
+        this._lineBtnClickHandler.bind(this)(button)
+      );
+      
+     return button
+  }
+
+   // handlers for toolbar buttons
+   _toggleBtnClickHandler(button) {    
     button.classList.toggle('active');
     const selectedText = this._selection.toString();
     if (selectedText === '') {
       const activeBtns = this.toolbar.querySelectorAll(
         '.samerEditor-formats > .active.toggleType'
       );
+     console.log(activeBtns[0]?.getAttribute('data-nodeName'))
 
       const node = document.createElement(
         activeBtns[0]?.getAttribute('data-nodeName') || 'span'
       );
+
       let tempNode = node;
       for (let i = 1; i < activeBtns.length; i++) {
         tempNode.appendChild(
@@ -423,46 +420,30 @@ class SamerEditor {
     // }
     //  this._selection.removeAllRanges()
     //  this._selection.addRange(range)
-     this._deactivateToolbarButtons()
+     this._deactivateToolbarButtons('.samerEditor-formats > button')
+     this._updateMementos()
     }
   }
-  _defaultBtnClickHandler(button) {
-   alert(button.classList[0])
+
+// line type button click handler
+ _lineBtnClickHandler(button){
+   const activeButton = this.toolbar.querySelector('.samerEditor-formats > button.samerEditor-header.active')
+    if (activeButton !== null && activeButton !== button) activeButton.classList.remove('active')
+    button.classList.toggle('active')
+    let node = null
+   if (button.classList.contains('active')){
+     node = document.createElement(button.getAttribute('data-nodeName'))
+   }else{
+     node = document.createElement('P')
+   }
+   node.style.cssText = 'margin:0;padding:0'
+   node.innerHTML =this._focusedLineNode.innerHTML
+   this._focusedLineNode.parentElement.replaceChild(node,this._focusedLineNode) 
+   this._focusedLineNode = node
+   this._focusLastTimeFocusedNode()
   }
-  //helper functions:
-  _getToggleBtn(name){
-    const button = document.createElement('button');
-    const { html, value, nodeName,className } = this._samerEditorButtons.toggleType[name];
-    button.className = className;
-    this[`${name}Button`] = button;
-    button.innerHTML = html;
-    button.value = value;
-    button.setAttribute('data-nodeName', nodeName);
-    button.addEventListener('click', () =>
-      this._toggleBtnClickHandler.bind(this)(button)
-    );
-    return button;
-  };
- 
-  _getDefaultBtn(name){
-    const button = document.createElement('button');
-    const {html,className} = this._samerEditorButtons.defaultType[name];
-    button.className = className
-    this[`${name}Button`] = button;
-    button.innerHTML = html;
-  
-    if(name === 'undo' || name === 'redo'){
-       this._mementos = [this.editor.innerHTML]
-       this._mementoIndex = 0;
-       this._redoUndoDisableHandler()
-       button.addEventListener('click', () =>
-       this._redoUndoClickHandler.bind(this)(name)
-       
-     );
-    } 
-    return button;
-  }
-  
+
+// undo - redo button click handler
   _redoUndoClickHandler(name){
    const undo = ()=>{
     if (this._mementoIndex > 0) {
@@ -480,6 +461,8 @@ class SamerEditor {
    }
    this._redoUndoDisableHandler()
   }
+
+ //this function will  disable / able the undo - redo button
  _redoUndoDisableHandler(){
   if (this._mementoIndex <= 0){
     this.undoButton?.setAttribute("disabled", "true")
@@ -539,9 +522,13 @@ class SamerEditor {
       this.strikeButton.classList.remove('active');
     }
   }
+  // H1 - H6 
+  this.toolbar.querySelector('.samerEditor-formats > button.samerEditor-header.active')?.classList.remove('active')
+  this[`${this._focusedLineNode.nodeName}Button`]?.classList.add('active')
+  
   }
  
-  // helper functions :
+  // helper functions : insertAfter - we really needs it
   _insertAfter(newNode, child, parent) {
     if (child.nextElementSibling === null) {
       parent.appendChild(newNode);
@@ -551,11 +538,9 @@ class SamerEditor {
   }
 
  
-
- 
   //helper function for deactivating the active buttons
-  _deactivateToolbarButtons(){
-    const buttons = this.toolbar.querySelectorAll('.samerEditor-formats > button.active')
+  _deactivateToolbarButtons(query){
+    const buttons = this.toolbar.querySelectorAll(`${query}.active`)
      for (const button of buttons){
        button.classList.remove('active')
      }
