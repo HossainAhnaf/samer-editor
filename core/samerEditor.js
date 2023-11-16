@@ -1,15 +1,19 @@
-import _samerEditorButtons from "../samerEditor-buttons";
-
+import samerEditorButtons from '../buttons.js'
 /**
  * SamerEditor - A rich text editor class.
  * @param {string} query - The query selector of the editor container.
  * @param {Object} options - Configuration options for the editor.
- * @param {number} options.width - The initial width of the editor.
- * @param {number} options.height - The initial height of the editor.
  */
-class SamerEditor {
-  constructor(query, options = { modules: {syntax: true,toolbar:{container:null,options:[]}},  theme: 'light' }
+ export default class SamerEditor {
+  constructor(query, options = { modules: {
+    syntax: true,
+    toolbar:{container:null,options:[]},
+    shortKeys:{}
+  },  theme: 'light' 
+  }
   ) {
+   this._samerEditorButtons = samerEditorButtons 
+
     this.editor = document.querySelector(query);
     this.editor.className = 'samerEditor-editor';
    if (this.editor.children.length === 0) 
@@ -23,7 +27,7 @@ class SamerEditor {
 
   
    
-
+    this._shortKeys = options.modules.shortKeys
     this._selection = window.getSelection();
     this._newCreatedNode = null;
     this._focusedLineNode = this.editor.lastElementChild;
@@ -31,27 +35,28 @@ class SamerEditor {
     this._focusedTextNode = this._focusedNode.childNodes[0];
     this._focusedOffset = 0;
     this._lineNodenames = ['P', 'OL', 'UL', 'H1', 'H2','H3','H4','H5','H6'];
-
+   
   
     this._initEditor.bind(this)();
   }
 
   _initEditor() {
-    this.editor.onkeyup = this._editorKeyUpHandler.bind(this);
     this.editor.onclick = () => {
-      this._updateFocusedNodes.bind(this)();
+      this._updateFocusedNodes();
       this._toolbarButtonsHighligthHandler();
     };
-
     this.editor.onkeydown = this._editorKeyDownHandler.bind(this);
+    this.editor.onkeyup = this._updateFocusedNodes.bind(this);
     this.editor.oninput = this._editorInputHandler.bind(this);
-
+    this.editor.onpaste = this._pasteHandler.bind(this);
+    
       //fn for updating the mementos
      this._updateMementos = this._debounce(()=>{
      if (!this._mementos.includes(this.editor.innerHTML)){  
       this._mementos.push(this.editor.innerHTML)
       this._mementoIndex += 1
       this._redoUndoDisableHandler() 
+   
      } 
      },300)
         
@@ -114,19 +119,22 @@ class SamerEditor {
     this._selection.removeAllRanges();
     this._selection.addRange(range);
     this._newCreatedNode = null;
+    this._toolbarButtonsHighligthHandler()
   }
 
   //handlers for editor
-  _editorKeyUpHandler() {
-    this._updateFocusedNodes();
-    this._toolbarButtonsHighligthHandler();
-  }
+ 
   _editorKeyDownHandler(e) {
-    //checking if key == enter then create new line
-    if (e.key === 'Enter') {
+    //checking for shortKeys
+    if(e.ctrlKey && e.key in this._shortKeys){
+      e.preventDefault()
+     this._shortKeyFormatHandler(this._shortKeys[e.key])
+    }//checking if key == enter then create new line
+   else if (e.key === 'Enter') {
       e.preventDefault();
-      this._createNewLine()
-    }
+      this._createNewLine()      
+  }else this._toolbarButtonsHighligthHandler();
+
   }
 
   _editorInputHandler() {
@@ -155,7 +163,6 @@ class SamerEditor {
     if (this._focusedLineNode.contains(this._focusedNode))
       this._focusedLineNode.insertBefore(newNode, this._focusedNode);
     else {
-      console.log(this._focusedNode);
       return 0;
     }
 
@@ -188,10 +195,12 @@ class SamerEditor {
     range.setEndBefore(p.firstElementChild);
     this._selection.removeAllRanges();
     this._selection.addRange(range);
+
+    this._updateMementos()
   }
  // this function will update the focused node,line,textNode 
   _updateFocusedNodes() {
-    if (this.editor.contains(this._selection.focusNode)) {
+    if (this.editor !== this._selection.focusNode && this.editor.contains(this._selection.focusNode)) {
       //updating old focused offset
       this._focusedOffset = this._selection.focusOffset;
       //updating the last time focused line  node
@@ -208,6 +217,7 @@ class SamerEditor {
         !this._lineNodenames.includes(this._selection.focusNode.nodeName)
       ) {
         let current = this._selection.focusNode;
+
         while (!this._lineNodenames.includes(current.parentElement.nodeName)) {
           current = current.parentElement;
         }
@@ -258,9 +268,9 @@ class SamerEditor {
     button.innerHTML = html;
     button.value = value;
     button.setAttribute('data-nodeName', nodeName);  
- 
+    button.setAttribute('data-handlerName', '_toggleTypeBtnClickHandler');  
     button.addEventListener('click', () =>
-      this._toggleBtnClickHandler.bind(this)(button)
+      this._toggleTypeBtnClickHandler.bind(this)(button)
     );
     return button;
   };
@@ -273,7 +283,8 @@ class SamerEditor {
     button.className = className
     this[`${name}Button`] = button;
     button.innerHTML = html;
-  
+    button.setAttribute('data-handlerName', '_redoUndoClickHandler');  
+
     if(name === 'undo' || name === 'redo'){
        this._mementos = [this.editor.innerHTML]
        this._mementoIndex = 0;
@@ -296,24 +307,24 @@ class SamerEditor {
       button.innerHTML = html
       button.value = obj[name]
       button.setAttribute('data-nodeName', finalNodeName);  
+      button.setAttribute('data-handlerName', '_lineTypeBtnClickHandler');  
       this[`${finalNodeName}Button`] = button;
    
       button.addEventListener('click', () =>
-        this._lineBtnClickHandler.bind(this)(button)
+        this._lineTypeBtnClickHandler.bind(this)(button)
       );
       
      return button
   }
 
    // handlers for toolbar buttons
-   _toggleBtnClickHandler(button) {    
+   _toggleTypeBtnClickHandler(button) {
     button.classList.toggle('active');
     const selectedText = this._selection.toString();
     if (selectedText === '') {
       const activeBtns = this.toolbar.querySelectorAll(
         '.samerEditor-formats > .active.toggleType'
       );
-     console.log(activeBtns[0]?.getAttribute('data-nodeName'))
 
       const node = document.createElement(
         activeBtns[0]?.getAttribute('data-nodeName') || 'span'
@@ -331,6 +342,10 @@ class SamerEditor {
       this._focusLastTimeFocusedNode();
     } else {
       let range = this._selection.getRangeAt(0);
+
+      const startOffset = range.startOffset 
+      const endOffset = range.endOffset 
+  
       // adding all the selected elements in 'selectedElements'
       const walker = document.createTreeWalker(
         this.editor,
@@ -406,27 +421,24 @@ class SamerEditor {
           selectedElements[i]
         );
         if(i===0)firstNode = newNode
-        else if (i === selectedElements.length - 1) lastNode = newNode 
+        lastNode = newNode 
       }
-     //TODO
-    //  range = document.createRange()
-    // if (lastNode === null){
-    //   range.setStartBefore(firstNode.childNodes[0]) 
-    //   range.setEndAfter(firstNode.childNodes[firstNode.childNodes.length - 1]) 
-    //   console.log(firstNode.childNodes[0].textContent)
-    // }else{
-    //   range.setStartBefore(firstNode.childNodes[0]) 
-    //   range.setEndAfter(lastNode.childNodes[0]) 
-    // }
-    //  this._selection.removeAllRanges()
-    //  this._selection.addRange(range)
+     
+     this._focusedNode = firstNode  
+     range = document.createRange()
+     range.setStart(firstNode.childNodes[0],startOffset) 
+     range.setEnd(lastNode.childNodes[0],endOffset) 
+    
+     this._selection.removeAllRanges()
+     this._selection.addRange(range)
      this._deactivateToolbarButtons('.samerEditor-formats > button')
      this._updateMementos()
+     this._toolbarButtonsHighligthHandler()
     }
   }
 
 // line type button click handler
- _lineBtnClickHandler(button){
+ _lineTypeBtnClickHandler(button){
    const activeButton = this.toolbar.querySelector('.samerEditor-formats > button.samerEditor-header.active')
     if (activeButton !== null && activeButton !== button) activeButton.classList.remove('active')
     button.classList.toggle('active')
@@ -476,6 +488,25 @@ class SamerEditor {
      this.redoButton?.removeAttribute("disabled", "true")
    }
  }
+
+//handler for shortKey formatting
+_shortKeyFormatHandler(commandItem){
+  if (Array.isArray(commandItem)){
+    for (const item of commandItem){
+      const button =  this[`${item}Button`]
+      const handlerFunction = this[button.getAttribute('data-handlerName')]
+      handlerFunction.bind(this)(button)
+    }
+  }else{
+  const button = this[`${commandItem}Button`]
+
+  const handlerFunction = this[button.getAttribute('data-handlerName')]
+  handlerFunction.bind(this)(button)
+
+}
+
+}
+
   //function for highliting active buttons
   _toolbarButtonsHighligthHandler() {
     //bold
@@ -527,7 +558,12 @@ class SamerEditor {
   this[`${this._focusedLineNode.nodeName}Button`]?.classList.add('active')
   
   }
- 
+  //handler for paste
+  _pasteHandler(e){
+    e.preventDefault() 
+ this._focusedNode.innerText += e.clipboardData.getData('text/plain')
+    
+  }
   // helper functions : insertAfter - we really needs it
   _insertAfter(newNode, child, parent) {
     if (child.nextElementSibling === null) {
@@ -569,6 +605,7 @@ class SamerEditor {
 
   // helper function for focus the LastTime Focused Node
   _focusLastTimeFocusedNode() {
+  
     if (this._focusedOffset > this._focusedTextNode.length) {
       this._focusedOffset = this._focusedTextNode.length;
     }
