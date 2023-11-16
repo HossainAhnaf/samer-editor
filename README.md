@@ -21,6 +21,7 @@ First of all you have to download the project then You can include the SamerEdit
 ```
 ### Features
 - [Customizable toolbar with formatting options](#toolbar).
+- [Keyboard shortcuts](#keyboad-shortcuts)
 - [SEO-friendly](#seo-friendly).
 - [Theme support](#theme-support).
 ### Toolbar
@@ -32,7 +33,11 @@ The editor comes with a customizable toolbar that allows you to apply formatting
 - undo
 - redo
 - headers : h1,h2,h3,h4,h5,h6
+-
 `I will add more formatting options in future.`
+
+### Keyboard Shortcuts
+The editor provides keyboard shortcuts for common formatting operations. For example, you can use shortcuts to make text bold, italic, or underline and more.
 
 ### SEO-friendly
 SamerEditor gives you a SEO-friendly HTML.
