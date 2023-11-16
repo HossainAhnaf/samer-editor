@@ -42,16 +42,31 @@ SamerEditor supports multiple themes. You can switch between light and dark them
 
 ### Configuration
 ```js
-  const samerEditor = new SamerEditor('#editor',{
-      modules:{
-        syntax: false,
-        toolbar: {
-          container:'#toolbar',
-          options: [['bold','italic','strike','underline']]
+const samerEditor = new SamerEditor(
+  '#editor',
+  {
+    modules: {
+      syntax: false,
+      toolbar: {
+        container: '#toolbar',
+        options: [
+          ['bold', 'italic', 'strike', 'underline'],
+          [{ header: '1' }, { header: '2' }, { header: '3' }],
+          ['undo', 'redo'],
+        ],
+      },
+      shortKeys: {
+        b: 'bold',
+        s: 'strike',
+        p: ['bold', 'italic', 'strike', 'underline'],
+        j: 'H1',
       },
     },
-      theme:'light'//or 'dark'
-    }, 400, 600);
+    theme: 'dark',
+  },
+  
+);
+
 ```
 ### Contributing
 If you would like to contribute to SamerEditor, feel free to open issues or submit pull requests on the GitHub repository.
