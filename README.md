@@ -56,15 +56,17 @@ const samerEditor = new SamerEditor(
         container: '#toolbar',
         options: [
           ['bold', 'italic', 'strike', 'underline'],
-          [{ header: '1' }, { header: '2' }, { header: '3' }],
-          ['undo', 'redo'],
+          ['undo','redo'],[{'header':1},{'header':3}]
         ],
       },
       shortKeys: {
-        b: 'bold',
-        s: 'strike',
-        p: ['bold', 'italic', 'strike', 'underline'],
-        j: 'H1',
+        b: {
+          ctrlKey: true,
+          shiftKey:false,
+          handler:()=>{
+            console.log('you pressed "b"')
+          }
+        }
       },
     },
     theme: 'dark',

@@ -1,37 +1,37 @@
 .samerEditor-stroke{
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 2;
-    stroke: #444;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  stroke: #444;
 }
 
 .samerEditor-thin{
-    stroke-width: 1;
- }
+  stroke-width: 1;
+}
 
 .samerEditor-toolbar{
-    border: min(1vw,2px) solid black;
-    padding: .5vw;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 1vw;
-    overflow: hidden;
+  border: min(1vw,2px) solid black;
+  padding: .5vw;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 1vw;
+  overflow: hidden;
 }
 .samerEditor-toolbar.theme-dark{
-    background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.7);
 }
 .samerEditor-toolbar.theme-light{
-    background: linear-gradient( orangered,darkred);
-    background-color: orangered;
+  background: linear-gradient( orangered,darkred);
+  background-color: orangered;
 }
 .samerEditor-formats{
- background-color: white;
- display: flex;
- gap: 15px;
- width: max-content;
- height: max-content;
- padding: min(10px,3%) min(18px,6%);
+background-color: white;
+display: flex;
+gap: 15px;
+width: max-content;
+height: max-content;
+padding: min(10px,3%) min(18px,6%);
 box-shadow: 0 0 2.5px 1.5px rgba(0, 0, 0, 0.5);
 font-size: min(4vw,15px);
 }
@@ -49,40 +49,37 @@ transition: scale .2s;
 color: orangered;
 }   
 .samerEditor-formats > button:disabled{
-    opacity: .5;
-    cursor:initial ;
+  opacity: .5;
+  cursor:initial ;
 }
-.samerEditor-formats > button.samerEditor-header::after{
-    content: attr(value);
-    font-size: .8em;
-}
+
 .samerEditor-formats .samerEditor-svgParent {
-    width: 1.2em;
-    height: 1.2em;
-    cursor: pointer;
+  width: 1.2em;
+  height: 1.2em;
+  cursor: pointer;
+ }  
+ .samerEditor-svgParent > svg{
+    width: 100%;
+    height: 100%;
    }  
-   .samerEditor-svgParent > svg{
-      width: 100%;
-      height: 100%;
-     }  
-   .samerEditor-svgParent:hover   .samerEditor-fill{
-      fill: orangered;
-   }
-   .samerEditor-svgParent:not(:disabled):hover   .samerEditor-stroke{
-      stroke: orangered;
-   }
+ .samerEditor-svgParent:hover   .samerEditor-fill{
+    fill: orangered;
+ }
+ .samerEditor-svgParent:not(:disabled):hover   .samerEditor-stroke{
+    stroke: orangered;
+ }
 
 .samerEditor-editor{
-    outline: none;
-    padding: 1em;
-    overflow-y: scroll;
-    overflow-x:hidden;
-    border: min(1vw,2px) solid black;
+  outline: none;
+  padding: 1em;
+  overflow-y: scroll;
+  overflow-x:hidden;
+  border: min(1vw,2px) solid black;
 }
 .samerEditor-editor *{
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 .samerEditor-editor :is(img,video){
-    width: 30em;
-    height: 30em;
+  width: 30em;
+  height: 30em;
 }
