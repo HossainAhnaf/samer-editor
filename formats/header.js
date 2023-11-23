@@ -60,7 +60,11 @@ export default class Header {
       node,
       this.context._focusedLineNode
     );
+    const oldNodeIndex=Array.from(this.context._focusedLineNode.children).indexOf(this.context._focusedNode)
+    const oldTextNodeIndex =Array.from(this.context._focusedNode.childNodes).indexOf(this.context._focusedTextNode)
     this.context._focusedLineNode = node;
+    this.context._focusedNode = node.children[oldNodeIndex];
+    this.context._focusedTextNode = node.children[oldNodeIndex].childNodes[oldTextNodeIndex];
    focusLastTimeFocusedNode(this.context);
   }
 }
