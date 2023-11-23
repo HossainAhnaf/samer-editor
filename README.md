@@ -37,7 +37,7 @@ The editor comes with a customizable toolbar that allows you to apply formatting
 `I will add more formatting options in future.`
 
 ### Keyboard Shortcuts
-The editor provides keyboard shortcuts for common formatting operations. For example, you can use shortcuts to make text bold, italic, or underline and more.
+The editor provides keyboard shortcuts for common formatting operations. For example, you can set shortcuts to make text bold, italic, or underline and more.
 
 ### SEO-friendly
 SamerEditor gives you a SEO-friendly HTML.
@@ -56,15 +56,22 @@ const samerEditor = new SamerEditor(
         container: '#toolbar',
         options: [
           ['bold', 'italic', 'strike', 'underline'],
-          ['undo','redo'],[{'header':1},{'header':3}]
+          ['undo','redo']
         ],
       },
       shortKeys: {
-        b: {
+        b:{
+          ctrlKey: false,
+          shiftKey:true,
+          handler:()=>{
+            samerEditor.format('bold') // or italic,underline .....
+          }
+        }
+        1: {
           ctrlKey: true,
           shiftKey:false,
           handler:()=>{
-            console.log('you pressed "b"')
+            samerEditor.format('header','1')
           }
         }
       },
