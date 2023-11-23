@@ -91,7 +91,7 @@
       _this.context._insertAfter(endNode, endContainer, endContainer.parentElement);
      
     //base oparetions:
-     const nodeName = (button.classList.contains('active') ? button.getAttribute('data-nodeName') : 'span') 
+     const nodeName = (_this.createdButtons[0].classList.contains('active') ? _this.createdButtons[0].getAttribute('data-nodeName') : 'span') 
     let firstNode = null
     let lastNode = null
      for (let i = 0; i < selectedElements.length; i++) {
@@ -113,7 +113,6 @@
    
     _this.context._selection.removeAllRanges()
     _this.context._selection.addRange(range)
-    _this.context._deactivateToolbarButtons('.samerEditor-formats > button')
     _this.context._updateMementos()
     _this.context._toolbarButtonsHighligthHandler()
    }
