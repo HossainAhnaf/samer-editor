@@ -1,4 +1,3 @@
-import samerEditorButtons from '../buttons.js';
 //formats
 import boldFormat from '../formats/bold';
 import italicFormat from '../formats/italic';
@@ -31,7 +30,6 @@ export default class SamerEditor {
       theme: 'light',
     }
   ) {
-    this._samerEditorButtons = samerEditorButtons;
 
     //formats
     this._boldFormat = new boldFormat(this);
@@ -278,6 +276,10 @@ export default class SamerEditor {
     return toolbar;
   }
 
+  //format text at user’s current selection
+  format(name,value){
+    this[`_${name}Format`].click(value)
+  }
   //this function will  disable / able the undo - redo button
   _redoUndoDisableHandler() {
     if (this._mementoIndex === 0) {
